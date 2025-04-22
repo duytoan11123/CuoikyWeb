@@ -1,0 +1,41 @@
+# Ignore cho Backend (Node.js)
+backend/node_modules/
+backend/.env
+backend/npm-debug.log
+backend/yarn-debug.log
+backend/yarn-error.log
+
+# Ignore cho Frontend (Next.js)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env.*
+frontend/npm-debug.log
+frontend/yarn-debug.log
+frontend/yarn-error.log
+
+# Ignore chung
+logs
+*.log
+*.log.*
+coverage/
+dist/
+build/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.swp
+*.swo
+*.tgz
+*.tar.gz
+*.zip
+*.rar
+pids
+*.pid
+*.seed
+jspm_packages/
+.npm
