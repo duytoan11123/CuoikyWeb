@@ -1,5 +1,5 @@
 # Dependencies
-node_modules/
+**/node_modules/
 .pnp
 .pnp.js
 
@@ -39,4 +39,5 @@ yarn-error.log*
 *.log.*
 .DS_Store
 Thumbs.dbnode_modules/
+node_modules/
 node_modules/
