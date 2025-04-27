@@ -7,7 +7,8 @@ require('dotenv').config();
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:4000/api/auth/google/callback"
+    callbackURL: "http://localhost:4000/api/auth/google/callback",
+    proxy: true
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -35,6 +36,7 @@ passport.use(new GoogleStrategy({
 
 // Serialize and deserialize user
 passport.serializeUser((user, done) => {
+  // Lưu user.UserID vào session
   done(null, user.UserID);
 });
 
@@ -45,7 +47,11 @@ passport.deserializeUser(async (id, done) => {
       .input('id', sql.Int, id)
       .query('SELECT * FROM Users WHERE UserID = @id');
     
-    done(null, result.recordset[0]);
+    if (result.recordset.length > 0) {
+      done(null, result.recordset[0]);
+    } else {
+      done(new Error('User not found'));
+    }
   } catch (err) {
     done(err);
   }
@@ -67,26 +73,34 @@ const loginUser = async (req, res) => {
       .input('email', sql.VarChar, email)
       .input('password', sql.VarChar, password)
       .query('SELECT * FROM Users WHERE Email = @email AND Password = @password');
-    
     if (result.recordset.length > 0) {
       const user = result.recordset[0];
-      res.status(200).json({ 
-        status: 'success',
-        message: 'Đăng nhập thành công!',
-        user: {
-          id: user.UserID,
-          email: user.Email
+      const vocabulary = await pool.request()
+        .input('userID', sql.Int, result.UserID)
+        .query('SELECT * FROM Vocabulary WHERE UserID = @userID');
+      req.session.user = {
+        userInfo: user,
+        vocabulary: vocabulary
+      }
+      req.session.save(err => {
+        if (err) {
+          console.error('Lỗi lưu session:', err);
+          return res.status(500).send('Lỗi server');
         }
       });
+      return res.status(200).json({ 
+        status: 'success',
+        message: 'Đăng nhập thành công!'
+      });
     } else {
-      res.status(401).json({ 
+      return res.status(401).json({ 
         status: 'error',
         message: 'Sai email hoặc mật khẩu' 
       });
     }
   } catch (err) {
     console.error('Database error:', err);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       status: 'error',
       message: 'Lỗi server, vui lòng thử lại sau' 
     });
@@ -104,8 +118,60 @@ const googleAuthCallback = passport.authenticate('google', {
   successRedirect: 'http://localhost:3000'
 });
 
+const registerUser = async (req, res) => {
+  const {email, password} = req.body;
+  if (!email || !password) {
+      return res.status(400).json({
+          status: 'error',
+          message: 'Email và mật khẩu không được để trống'
+      });
+  }
+  try {
+      const pool = await poolPromise;
+      const result = await pool.request()
+          .input('email', sql.VarChar, email)
+          .input('password', sql.VarChar, password)
+          .query('select * from Users where email = @email');
+      if (result.recordset.length > 0) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Email đã tồn tại'
+        });
+      }
+      await pool.request()
+          .input('email', sql.VarChar, email)
+          .input('password', sql.VarChar, password)
+          .query('insert into Users (Email, Password) values (@email, @password)');
+      return res.status(200).json({
+          status: 'success',
+          message: 'Đăng ký thành công'
+      });
+  } catch (error) {
+      return res.status(500).json({
+          status: 'error',
+          message: 'Đăng ký thất bại'
+      });
+  }
+};
+
+const logoutUser = async (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Đăng xuất thất bại'
+      });
+    }
+    return res.status(200).json({
+      status: 'success',
+      message: 'Đăng xuất thành công'
+    });
+  });
+};
+
 module.exports = { 
   loginUser,
   googleAuth,
-  googleAuthCallback
+  googleAuthCallback,
+  registerUser
 };

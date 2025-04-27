@@ -1,22 +1,30 @@
 const express = require('express');
-const { corsMiddleware, loggingMiddleware } = require('./middleware');
 const authRoutes = require('./routes/authRoutes');
 const session = require('express-session');
 const passport = require('passport');
+const fetchNews = require('./controllers/getNews');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
 
 // Middleware
-app.use(corsMiddleware);
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+}));
 app.use(express.json());
-app.use(loggingMiddleware);
 
 // Session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'lax'
+  }
 }));
 
 // Initialize Passport
@@ -31,7 +39,16 @@ app.get('/', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
-
+app.get('/api/news', fetchNews);
+app.get('/api/me',(req,res)=>{
+    console.log('Session ID:', req.sessionID);
+    console.log('Session at /api/me:', req.session);
+    if(req.session.user){
+        return res.json({loggedIn: true, user: req.session.user})
+    }else{
+        return res.json({loggedIn: false})
+    }
+})
 // Handle 404
 app.use((req, res) => {
     console.log('404 Not Found:', req.method, req.url);
@@ -41,7 +58,6 @@ app.use((req, res) => {
         path: req.url
     });
 });
-
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Server error:', err);

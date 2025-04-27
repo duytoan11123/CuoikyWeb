@@ -3,14 +3,15 @@ const sql = require('mssql');
 
 // Cấu hình thông tin kết nối
 const config = {
-  user: 'sa',      // tài khoản SQL Server
-  password: '123',  // mật khẩu SQL Server
-  server: 'localhost',        // hoặc IP/hostname của server
-  database: 'CuoiKyWeb',  // tên database
+  server: 'localhost',                    // Thử dùng localhost thay vì tên instance
+  database: 'CuoiKyWeb',
+  user: 'sa',                              // Thay bằng username của bạn
+  password: '123',                      // Thay bằng password của bạn
   options: {
-    encrypt: false,             // true nếu dùng Azure SQL
-    trustServerCertificate: true, // để tránh lỗi SSL khi dev local
-  },
+    encrypt: false,                      // Tắt mã hóa
+    trustServerCertificate: true,        
+    enableArithAbort: true
+  }
 };
 
 // Tạo pool kết nối
