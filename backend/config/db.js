@@ -1,29 +1,25 @@
 // backend/db.js
-const sql = require('mssql');
-
+const sql = require('mysql2/promise');
+require('dotenv').config();
 // Cấu hình thông tin kết nối
 const config = {
-  server: 'localhost',                    // Thử dùng localhost thay vì tên instance
-  database: 'CuoiKyWeb',
-  user: 'sa',                              // Thay bằng username của bạn
-  password: '123',                      // Thay bằng password của bạn
-  options: {
-    encrypt: false,                      // Tắt mã hóa
-    trustServerCertificate: true,        
-    enableArithAbort: true
-  }
-};
+  host: "localhost",
+  user: process.env.SQL_USER, // Thay bằng username MySQL của bạn
+  password: process.env.SQL_PASSWORD, // Thay bằng password MySQL của bạn
+  database: "cuoikyweb", // Tên database của bạn
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  };
 
 // Tạo pool kết nối
-const poolPromise = new sql.ConnectionPool(config)
-  .connect()
-  .then(pool => {
-    console.log('✅ Connected to SQL Server');
-    return pool;
-  })
-  .catch(err => {
-    console.error('❌ Database Connection Failed:', err);
-    throw err;
-  });
+const poolPromise = new sql.createPool(config)
+  
+if (poolPromise) {console.log('✅ Connected to SQL Server');
+}
+else {
+  console.error('❌ Database Connection Failed:', err);
+  throw err;
+};
 
 module.exports = { sql, poolPromise };

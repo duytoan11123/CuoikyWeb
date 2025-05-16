@@ -1,10 +1,10 @@
 // components/Header.tsx
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-
+import { useRouter } from 'next/navigation';
 export default function Header() {
   const pathname = usePathname();
-
+  const router = useRouter();
   return (
     <header className="bg-zinc-900 bg-slate-800/90 backdrop-blur px-6 py-2 flex items-center justify-between">
       {/* Logo */}
@@ -18,11 +18,17 @@ export default function Header() {
         <NavItem src="/news" icon="/icons/news.svg" label="Tin tức" isActive={pathname === '/news'} />
         <NavItem src="/#" icon="/icons/study.svg" label="Luyện Tập" isActive={pathname === '/study'} />
         <NavItem src="/#" icon="/icons/notebook.svg" label="Sổ tay" isActive={pathname === '/notebook'}  />
-        <NavItem src="/#" icon="/icons/user.svg" label="Tài khoản" isActive={pathname === '/account'} />
+        <NavItem src="/#" icon="/icons/user.svg" label="Tài khoản" isActive={pathname === '/account'}  />
       </nav>
 
       {/* User Avatar */}
-      <div className="w-10 h-10 rounded-full border-2 border-green-500 overflow-hidden">
+      <div className="w-10 h-10 rounded-full border-2 border-green-500 overflow-hidden"  onClick={() => {fetch('http://localhost:4000/api/auth/logout',{
+        credentials:'include',
+        method: 'POST'
+      })
+      router.refresh();
+    }
+      }>
         <Image src="/avatar/avatar1.jpg" alt="User Avatar" width={40} height={40} />
       </div>
     </header>

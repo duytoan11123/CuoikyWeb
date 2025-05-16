@@ -13,7 +13,7 @@ passport.use(new GoogleStrategy({
   async (accessToken, refreshToken, profile, done) => {
     try {
       const pool = await poolPromise;
-      const result = await pool.request()
+      const [result] = await pool.request()
         .input('email', sql.VarChar, profile.emails[0].value)
         .query('SELECT * FROM Users WHERE Email = @email');
 
@@ -69,15 +69,12 @@ const loginUser = async (req, res) => {
 
   try {
     const pool = await poolPromise;
-    const result = await pool.request()
-      .input('email', sql.VarChar, email)
-      .input('password', sql.VarChar, password)
-      .query('SELECT * FROM Users WHERE Email = @email AND Password = @password');
-    if (result.recordset.length > 0) {
-      const user = result.recordset[0];
-      const vocabulary = await pool.request()
-        .input('userID', sql.Int, result.UserID)
-        .query('SELECT * FROM Vocabulary WHERE UserID = @userID');
+    const [result] = await pool
+      .query('SELECT * FROM Users WHERE Email = ? AND Password = ?',[email,password]);
+    if (result.length > 0) {
+      const user = result[0];
+      const vocabulary = await pool
+        .query('SELECT * FROM Vocabulary WHERE UserID = @userID',[result.UserID]);
       req.session.user = {
         userInfo: user,
         vocabulary: vocabulary
@@ -128,20 +125,16 @@ const registerUser = async (req, res) => {
   }
   try {
       const pool = await poolPromise;
-      const result = await pool.request()
-          .input('email', sql.VarChar, email)
-          .input('password', sql.VarChar, password)
-          .query('select * from Users where email = @email');
-      if (result.recordset.length > 0) {
+      const [result] = await pool
+          .query('select * from Users where email = ?',[email]);
+      if (result.length > 0) {
         return res.status(400).json({
           status: 'error',
           message: 'Email đã tồn tại'
         });
       }
-      await pool.request()
-          .input('email', sql.VarChar, email)
-          .input('password', sql.VarChar, password)
-          .query('insert into Users (Email, Password) values (@email, @password)');
+      await pool
+          .query('insert into Users (Email, Password) values (?, ?)',[email,password]);
       return res.status(200).json({
           status: 'success',
           message: 'Đăng ký thành công'
@@ -173,5 +166,6 @@ module.exports = {
   loginUser,
   googleAuth,
   googleAuthCallback,
-  registerUser
+  registerUser,
+  logoutUser
 };

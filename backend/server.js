@@ -1,9 +1,11 @@
 const express = require('express');
 const authRoutes = require('./routes/authRoutes');
+const vocabularyRoute = require('./routes/vocabularyRoutes')
 const session = require('express-session');
 const passport = require('passport');
-const fetchNews = require('./controllers/getNews');
+const newsRoutes = require('./routes/newsRoutes');
 const cors = require('cors');
+const translateVietnameseWord = require('./controllers/translateController');
 require('dotenv').config();
 
 const app = express();
@@ -39,16 +41,17 @@ app.get('/', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
-app.get('/api/news', fetchNews);
 app.get('/api/me',(req,res)=>{
-    console.log('Session ID:', req.sessionID);
-    console.log('Session at /api/me:', req.session);
     if(req.session.user){
         return res.json({loggedIn: true, user: req.session.user})
     }else{
         return res.json({loggedIn: false})
     }
 })
+//vocabularyRoute
+app.use('/vocabulary',vocabularyRoute);
+app.post('/api/translate', translateVietnameseWord);
+app.use("/api/get", newsRoutes);
 // Handle 404
 app.use((req, res) => {
     console.log('404 Not Found:', req.method, req.url);
