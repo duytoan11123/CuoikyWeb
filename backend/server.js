@@ -6,6 +6,7 @@ const passport = require('passport');
 const newsRoutes = require('./routes/newsRoutes');
 const cors = require('cors');
 const translateVietnameseWord = require('./controllers/translateController');
+const { getAccountName } = require('./controllers/Getaccount');
 require('dotenv').config();
 
 const app = express();
@@ -52,6 +53,7 @@ app.get('/api/me',(req,res)=>{
 app.use('/vocabulary',vocabularyRoute);
 app.post('/api/translate', translateVietnameseWord);
 app.use("/api/get", newsRoutes);
+app.get('/api/account', getAccountName);
 // Handle 404
 app.use((req, res) => {
     console.log('404 Not Found:', req.method, req.url);
@@ -71,7 +73,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 
 // Start server
 const server = app.listen(PORT, () => {

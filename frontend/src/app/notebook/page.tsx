@@ -28,7 +28,6 @@ export default function NotebookPage() {
           return;
         }
         const userId = userData.user.userInfo.userId;
-        console.log(userId);
         const resTotal = await fetch(`http://localhost:4000/vocabulary/getReviewWords?userId=${userId}`);
         const total = await resTotal.json();
         setTotalWords(total.total || 0);
@@ -42,8 +41,8 @@ export default function NotebookPage() {
     fetchUserAndWords();
   }, [router]);
 
-  const handleSearch = async () => {
-    if (!user?.user?.userInfo?.userId || !search) {
+  const handleSearch = async (keyword: string) => {
+    if (!user?.user?.userInfo?.userId) {
       setError('Vui lòng đăng nhập và nhập từ để tìm kiếm.');
       return;
     }
@@ -51,13 +50,14 @@ export default function NotebookPage() {
     setError(null);
     try {
       const res = await fetch(
-        `http://localhost:4000/vocabulary/getWords?userId=${user.user.userInfo.userId}&search=${encodeURIComponent(search)}`,
+        `http://localhost:4000/vocabulary/getWords?userId=${user.user.userInfo.userId}&search=${encodeURIComponent(keyword)}`,
         { credentials: 'include' }
       );
       if (!res.ok) {
         throw new Error('Không thể lấy dữ liệu từ điển.');
       }
       const results = await res.json();
+      console.log(results);
       setSearchResults(results || []);
     } catch (error) {
       setError('Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại.');
@@ -86,20 +86,25 @@ export default function NotebookPage() {
       <div className="flex flex-col items-center w-full mt-2">
         <div className="flex bg-gray-100 rounded-full px-4 py-2 w-full max-w-xl shadow-sm items-center">
           <input
+          
             className="flex-1 bg-transparent outline-none px-2 py-1 text-gray-700 placeholder:text-gray-400 text-base"
             placeholder="Gõ vào đây từ bạn muốn tìm"
             value={search}
-            onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
+            onChange={e => {
+              const value = e.target.value;
+              setSearch(value);
+              handleSearch(value); // Gọi tìm kiếm khi người dùng gõ
+            }}
+            
           />
-          <button
+          {/* <button
             type="button"
             className="bg-green-500 hover:bg-green-600 font-semibold text-white rounded-full px-5 py-2 ml-3 transition-all shadow"
             onClick={handleSearch}
             disabled={isLoading}
           >
             {isLoading ? 'Đang tìm...' : 'Tìm kiếm'}
-          </button>
+          </button> */}
         </div>
         <div className="w-full max-w-xl mt-4 px-4">
           {error && <div className="text-red-500 mb-4">{error}</div>}
