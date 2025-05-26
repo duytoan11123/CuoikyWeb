@@ -3,7 +3,6 @@ import { useRouter } from 'next/navigation';
 import LoginForm from '../../../components/LoginForm';
 import Footer from '../../../components/footer';
 import { showSuccess, showError } from '../../../components/notification';
-import { useEffect } from 'react';
 const LoginPage = () => {
   const router = useRouter();
 
@@ -38,8 +37,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div>  
-      
+    <div>
       <LoginForm onSubmit={handleLogin} onClick={handleGoogleLogin} />
       <Footer/>
     </div>
