@@ -243,6 +243,169 @@ const updateWordTypes = async (req, res) => {
   }
 };
 
+/**
+ * @param {import('express').Request<{ userId: string }>} req
+ * @param {import('express').Response} res
+ */
+const getRandomWord = async (req, res) => {
+  const pool = await poolPromise;
+  const userId = req.params.userId;
+  console.log(`Received request for userId: ${userId}`);
+
+  try {
+    const [countResult] = await pool.query(
+      "SELECT COUNT(*) as total FROM vocabulary WHERE userId = ?",
+      [userId]
+    );
+    const totalWords = countResult[0].total;
+    console.log(`Total words for userId ${userId}: ${totalWords}`);
+
+    if (totalWords === 0) {
+      return res.status(200).json({
+        status: "success",
+        message: "Không có từ để ôn tập",
+        data: null,
+      });
+    }
+
+    const randomOffset = Math.floor(Math.random() * totalWords);
+    const [wordResult] = await pool.query(
+      "SELECT vocabularyId, word, translation FROM vocabulary WHERE userId = ? LIMIT 1 OFFSET ?",
+      [userId, randomOffset]
+    );
+
+    if (!wordResult[0]) {
+      return res.status(500).json({
+        status: "failed",
+        message: "Không tìm thấy từ vựng",
+      });
+    }
+
+    const { vocabularyId, word, translation } = wordResult[0];
+
+    let details = {
+      meaning: translation || "Không có nghĩa tiếng Việt",
+      phonetic: "Không có phát âm",
+      exampleSentence: "Không có ví dụ",
+      audio: null,
+    };
+
+    // Lấy meaning nếu không có sẵn trong DB
+    if (!translation) {
+      try {
+        const translateResponse = await axios.post('http://localhost:4000/api/translate', { word }, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 20000
+        });
+        const results = translateResponse.data.results;
+        const translated = results.length
+          ? results.map(item => `${item.partOfSpeech}: ${item.meaning}`).join('\n-')
+          : 'Không tìm thấy nghĩa.';
+
+        details.meaning = (translated !== word && translated.length > 0)
+          ? translated
+          : "Không có nghĩa tiếng Việt";
+
+        console.log("meaning từ api/translate:", details.meaning);
+      } catch (error) {
+        console.error("Lỗi khi lấy meaning từ api/translate:", error.message);
+      }
+    }
+
+    // Lấy thông tin từ dictionaryapi.dev
+    try {
+      const dictResponse = await axios.get(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`,
+        { timeout: 20000 }
+      );
+      const dictData = dictResponse.data[0];
+
+      // Lấy audio
+      details.audio = dictData.phonetics?.find(p => p.audio?.endsWith(".mp3"))?.audio || null;
+
+      // Lấy phát âm
+      details.phonetic = dictData.phonetic || dictData.phonetics?.find(p => p.text)?.text || "Không có phát âm";
+    } catch (apiError) {
+      console.error("Free Dictionary API error:", apiError.message);
+    }
+
+    // Lấy ví dụ từ API nội bộ
+    try {
+      const exampleRes = await axios.post('http://localhost:4000/api/getExample', { word }, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 20000
+      });
+      const results = exampleRes.data.results;
+      details.exampleSentence = results.length
+        ? results.map(item => `${item.partOfSpeech}: ${item.example}`).join('\n-')
+        : 'Không tìm thấy ví dụ.';
+    } catch (err) {
+      console.log("Lỗi khi lấy ví dụ từ api/getExample");
+    }
+
+    console.log("Final result:", details);
+    return res.status(200).json({
+      status: "success",
+      data: {
+        vocabularyId: vocabularyId,
+        word,
+        meaning: details.meaning,
+        phonetic: details.phonetic,
+        exampleSentence: details.exampleSentence,
+        audio: details.audio,
+      },
+    });
+  } catch (err) {
+    console.error("Error in getRandomWord:", err.message);
+    return res.status(500).json({
+      status: "failed",
+      message: err.message,
+    });
+  }
+};
+
+const deleteVocabulary = async (req, res) => {
+  const pool = await poolPromise;
+  const { vocabularyId } = req.body;
+   if (!vocabularyId || vocabularyId <= 0) {
+    return res.status(400).json({
+      status: 'failed',
+      message: 'vocabularyId không hợp lệ',
+    });
+  }
+
+  if (!vocabularyId) {
+    return res.status(400).json({
+      status: 'failed',
+      message: 'Thiếu vocabularyId trong request body.',
+    });
+  }
+
+  try {
+    const [result] = await pool.query(
+      "DELETE FROM vocabulary WHERE vocabularyId = ?",
+      [vocabularyId]
+    );
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({
+        status: 'success',
+        message: 'Từ vựng đã được xoá.',
+      });
+    } else {
+      res.status(404).json({
+        status: 'failed',
+        message: 'Không tìm thấy từ vựng để xoá.',
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      status: 'failed',
+      message: 'Lỗi server: ' + err.message,
+    });
+  }
+};
+
 module.exports = {
   addWord,
   getWords,
@@ -250,4 +413,6 @@ module.exports = {
   getSleepWords,
   getWordsByLevel,
   updateWordTypes,
+  getRandomWord,
+  deleteVocabulary
 };

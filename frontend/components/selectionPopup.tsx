@@ -7,7 +7,7 @@ type PopupData = {
   y: number;
   text: string;
   translatedText: string;
-};
+};  
 
  const addWWord = async (userId:any, word:any)=>{
   try {

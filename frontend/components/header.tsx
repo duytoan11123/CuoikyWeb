@@ -31,7 +31,7 @@ export default function Header() {
       {/* Navigation */}
       <nav className=" flex justify-between w-[70%]">
         <NavItem src="/news" icon="/icons/news.svg" label="Tin tức" isActive={pathname === '/news'} />
-        <NavItem src="/#" icon="/icons/study.svg" label="Luyện Tập" isActive={pathname === '/study'} />
+        <NavItem src="/practice" icon="/icons/study.svg" label="Luyện Tập" isActive={pathname === '/study'} />
         <NavItem src="/notebook" icon="/icons/notebook.svg" label="Sổ tay" isActive={pathname === '/notebook'}  />
         <NavItem src="/#" icon="/icons/user.svg" label="Tài khoản" isActive={pathname === '/account'}  />
       </nav>

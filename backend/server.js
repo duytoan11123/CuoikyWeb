@@ -5,7 +5,7 @@ const session = require('express-session');
 const passport = require('passport');
 const newsRoutes = require('./routes/newsRoutes');
 const cors = require('cors');
-const translateVietnameseWord = require('./controllers/translateController');
+const translateRoutes = require('./routes/translateRoutes');
 const { getAccountName } = require('./controllers/Getaccount');
 require('dotenv').config();
 
@@ -50,8 +50,8 @@ app.get('/api/me',(req,res)=>{
     }
 })
 //vocabularyRoute
+app.use('/api', translateRoutes);
 app.use('/vocabulary',vocabularyRoute);
-app.post('/api/translate', translateVietnameseWord);
 app.use("/api/get", newsRoutes);
 app.get('/api/account', getAccountName);
 // Handle 404
