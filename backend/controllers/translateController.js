@@ -40,7 +40,7 @@ async function translateVietnameseWord(req, res) {
           result.push({ partOfSpeech, meaning });
         }
       });
-
+      console.log("Kết quả khi gọi api translate: ",word, result);
     if (result.length === 0) {
       return res
         .status(404)
@@ -99,7 +99,7 @@ async function getExample(req, res) {
           result.push({ partOfSpeech, example });
         }
       });
-
+      console.log("Kết quả từ getExample: ", result);
     if (result.length === 0) {
       return res
         .status(404)

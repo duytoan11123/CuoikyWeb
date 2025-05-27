@@ -250,7 +250,6 @@ const updateWordTypes = async (req, res) => {
 const getRandomWord = async (req, res) => {
   const pool = await poolPromise;
   const userId = req.params.userId;
-  console.log(`Received request for userId: ${userId}`);
 
   try {
     const [countResult] = await pool.query(
@@ -258,7 +257,6 @@ const getRandomWord = async (req, res) => {
       [userId]
     );
     const totalWords = countResult[0].total;
-    console.log(`Total words for userId ${userId}: ${totalWords}`);
 
     if (totalWords === 0) {
       return res.status(200).json({
@@ -288,6 +286,7 @@ const getRandomWord = async (req, res) => {
       phonetic: "Không có phát âm",
       exampleSentence: "Không có ví dụ",
       audio: null,
+      imglink: ""
     };
 
     // Lấy meaning nếu không có sẵn trong DB
@@ -299,14 +298,13 @@ const getRandomWord = async (req, res) => {
         });
         const results = translateResponse.data.results;
         const translated = results.length
-          ? results.map(item => `${item.partOfSpeech}: ${item.meaning}`).join('\n-')
+          ? results.map(item => `${item.partOfSpeech}: ${item.meaning}`).join('\n -')
           : 'Không tìm thấy nghĩa.';
+
 
         details.meaning = (translated !== word && translated.length > 0)
           ? translated
           : "Không có nghĩa tiếng Việt";
-
-        console.log("meaning từ api/translate:", details.meaning);
       } catch (error) {
         console.error("Lỗi khi lấy meaning từ api/translate:", error.message);
       }
@@ -342,7 +340,17 @@ const getRandomWord = async (req, res) => {
     } catch (err) {
       console.log("Lỗi khi lấy ví dụ từ api/getExample");
     }
+    //lấy hình ảnh theo từ
+    const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
+    const unsplashRes = await fetch(`https://api.unsplash.com/search/photos?query=${word}&per_page=1`, {
+      headers: {
+        Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`,
+      },
+    });
 
+    const data = await unsplashRes.json();
+    const imglink = data.results[0]?.urls?.regular || null;
+    details.imglink = imglink;
     console.log("Final result:", details);
     return res.status(200).json({
       status: "success",
@@ -353,6 +361,7 @@ const getRandomWord = async (req, res) => {
         phonetic: details.phonetic,
         exampleSentence: details.exampleSentence,
         audio: details.audio,
+        imglink: details.imglink
       },
     });
   } catch (err) {
