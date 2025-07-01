@@ -3,10 +3,10 @@ const sql = require('mysql2/promise');
 require('dotenv').config();
 // Cấu hình thông tin kết nối
 const config = {
-  host: "localhost",
-  user: process.env.SQL_USER, // Thay bằng username MySQL của bạn
-  password: process.env.SQL_PASSWORD, // Thay bằng password MySQL của bạn
-  database: "cuoikyweb", // Tên database của bạn
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER, // Thay bằng username MySQL của bạn
+  password: process.env.DB_PASSWORD, // Thay bằng password MySQL của bạn
+  database: process.env.DB_NAME, // Tên database của bạn
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

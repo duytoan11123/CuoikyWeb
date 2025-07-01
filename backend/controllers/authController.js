@@ -12,23 +12,35 @@ passport.use(new GoogleStrategy({
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      const pool = await poolPromise;
-      const [result] = await pool.request()
-        .input('email', sql.VarChar, profile.emails[0].value)
-        .query('SELECT * FROM Users WHERE Email = @email');
+      const email = profile.emails?.[0]?.value;
+      const name = profile.displayName || 'Unknown';
 
-      if (result.recordset.length > 0) {
-        return done(null, result.recordset[0]);
+      if (!email) {
+        return done(new Error('Email không tồn tại trong profile Google'));
+      }
+
+      const [rows] = await poolPromise.query(
+        'SELECT * FROM Users WHERE Email = ?',
+        [email]
+      );
+
+      if (rows.length > 0) {
+        return done(null, rows[0]);
       } else {
-        // Create new user if not exists
-        const newUser = await pool.request()
-          .input('email', sql.VarChar, profile.emails[0].value)
-          .input('name', sql.VarChar, profile.displayName)
-          .query('INSERT INTO Users (Email, Name) OUTPUT INSERTED.* VALUES (@email, @name)');
-        
-        return done(null, newUser.recordset[0]);
+        const [insertResult] = await poolPromise.query(
+          'INSERT INTO Users (Email, Name) VALUES (?, ?)',
+          [email, name]
+        );
+
+        const [newUserRows] = await poolPromise.query(
+          'SELECT * FROM Users WHERE UserID = ?',
+          [insertResult.insertId]
+        );
+        console.log("User gửi vào serialize:", user);
+        return done(null, newUserRows[0]);
       }
     } catch (err) {
+      console.error("Google login error:", err);
       return done(err);
     }
   }
@@ -36,19 +48,23 @@ passport.use(new GoogleStrategy({
 
 // Serialize and deserialize user
 passport.serializeUser((user, done) => {
-  // Lưu user.UserID vào session
-  done(null, user.UserID);
+  const userId = user.UserID || user.userId; 
+  if (!userId) {
+    console.error("serializeUser: User invalid", user);
+    return done(new Error("Invalid user object: missing UserID or userId"));
+  }
+  done(null, userId);
 });
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const pool = await poolPromise;
-    const result = await pool.request()
-      .input('id', sql.Int, id)
-      .query('SELECT * FROM Users WHERE UserID = @id');
-    
-    if (result.recordset.length > 0) {
-      done(null, result.recordset[0]);
+    const pool = poolPromise;
+    const [rows] = await pool.query(
+      'SELECT * FROM Users WHERE userId = ?',
+      [id, id]
+    );
+    if (rows.length > 0) {
+      done(null, rows[0]);
     } else {
       done(new Error('User not found'));
     }
@@ -73,12 +89,8 @@ const loginUser = async (req, res) => {
       .query('SELECT * FROM Users WHERE Email = ? AND Password = ?',[email,password]);
     if (result.length > 0) {
       const user = result[0];
-      const vocabulary = await pool
-        .query('SELECT * FROM Vocabulary WHERE UserID = @userID',[result.UserID]);
-      req.session.user = {
-        userInfo: user,
-        vocabulary: vocabulary
-      }
+      req.session.userId = user.userId;
+      console.log("userId login user: ",req.session.userId);
       req.session.save(err => {
         if (err) {
           console.error('Lỗi lưu session:', err);

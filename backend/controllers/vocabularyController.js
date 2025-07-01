@@ -80,7 +80,8 @@ const fetchTranslation = async (word) => {
 
 const getWords = async (req, res) => {
   const pool = await poolPromise;
-  const { userId, search } = req.query;
+  const userId = req.session.userId;
+  const { search } = req.query;
   try {
     let query = 'SELECT * FROM vocabulary WHERE userId = ?';
     let params = [userId];
@@ -117,7 +118,7 @@ const getWords = async (req, res) => {
 
 const getReviewWords = async (req, res) => {
   const pool = await poolPromise;
-  const { userId } = req.query;
+  const userId = req.session.userId;
   try {
     const [result] = await pool.query(
       "SELECT COUNT(*) as total FROM vocabulary WHERE userId = ? AND type = 'review'",
@@ -134,7 +135,7 @@ const getReviewWords = async (req, res) => {
 
 const getSleepWords = async (req, res) => {
   const pool = await poolPromise;
-  const { userId } = req.query;
+  const userId = req.session.userId;
   try {
     const [words] = await pool.query(
       "SELECT * FROM vocabulary WHERE userId = ? AND type = 'sleep'",
@@ -151,7 +152,8 @@ const getSleepWords = async (req, res) => {
 
 const getWordsByLevel = async (req, res) => {
   const pool = await poolPromise;
-  const { userId, level } = req.query;
+  const userId = req.session.userId;
+  const { level } = req.query;
 
   let lengthCondition = '';
   switch (parseInt(level)) {
@@ -208,7 +210,8 @@ const getWordsByLevel = async (req, res) => {
 
 const updateWordTypes = async (req, res) => {
   const pool = await poolPromise;
-  const { userId, reviewWords, sleepWords } = req.body;
+  const userId = req.session.userId;
+  const { reviewWords, sleepWords } = req.body;
 
   try {
     await pool.query('BEGIN');
@@ -249,62 +252,55 @@ const updateWordTypes = async (req, res) => {
  */
 const getRandomWord = async (req, res) => {
   const pool = await poolPromise;
-  const userId = req.params.userId;
+  const userId = req.session.userId;
+  const index = parseInt(req.query.index) || 0;
 
   try {
-    const [countResult] = await pool.query(
-      "SELECT COUNT(*) as total FROM vocabulary WHERE userId = ?",
+    const [words] = await pool.query(
+      "SELECT vocabularyId, word, translation FROM vocabulary WHERE userId = ? ORDER BY vocabularyId ASC",
       [userId]
     );
-    const totalWords = countResult[0].total;
 
-    if (totalWords === 0) {
+    if (index < 0 || index >= words.length) {
       return res.status(200).json({
-        status: "success",
-        message: "Không có từ để ôn tập",
+        status: "done",
+        message: "Đã học hết tất cả các từ!",
         data: null,
       });
     }
 
-    const randomOffset = Math.floor(Math.random() * totalWords);
-    const [wordResult] = await pool.query(
-      "SELECT vocabularyId, word, translation FROM vocabulary WHERE userId = ? LIMIT 1 OFFSET ?",
-      [userId, randomOffset]
-    );
-
-    if (!wordResult[0]) {
-      return res.status(500).json({
-        status: "failed",
-        message: "Không tìm thấy từ vựng",
-      });
-    }
-
-    const { vocabularyId, word, translation } = wordResult[0];
+    const { vocabularyId, word, translation } = words[index];
 
     let details = {
       meaning: translation || "Không có nghĩa tiếng Việt",
       phonetic: "Không có phát âm",
       exampleSentence: "Không có ví dụ",
       audio: null,
-      imglink: ""
+      imglink: "",
     };
 
     // Lấy meaning nếu không có sẵn trong DB
     if (!translation) {
       try {
-        const translateResponse = await axios.post('http://localhost:4000/api/translate', { word }, {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 20000
-        });
+        const translateResponse = await axios.post(
+          "http://localhost:4000/api/translate",
+          { word },
+          {
+            headers: { "Content-Type": "application/json" },
+            timeout: 20000,
+          }
+        );
         const results = translateResponse.data.results;
         const translated = results.length
-          ? results.map(item => `${item.partOfSpeech}: ${item.meaning}`).join('\n -')
-          : 'Không tìm thấy nghĩa.';
+          ? results
+              .map((item) => `${item.partOfSpeech}: ${item.meaning}`)
+              .join("\n -")
+          : "Không tìm thấy nghĩa.";
 
-
-        details.meaning = (translated !== word && translated.length > 0)
-          ? translated
-          : "Không có nghĩa tiếng Việt";
+        details.meaning =
+          translated !== word && translated.length > 0
+            ? translated
+            : "Không có nghĩa tiếng Việt";
       } catch (error) {
         console.error("Lỗi khi lấy meaning từ api/translate:", error.message);
       }
@@ -313,40 +309,56 @@ const getRandomWord = async (req, res) => {
     // Lấy thông tin từ dictionaryapi.dev
     try {
       const dictResponse = await axios.get(
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`,
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
+          word
+        )}`,
         { timeout: 20000 }
       );
       const dictData = dictResponse.data[0];
 
       // Lấy audio
-      details.audio = dictData.phonetics?.find(p => p.audio?.endsWith(".mp3"))?.audio || null;
+      details.audio =
+        dictData.phonetics?.find((p) => p.audio?.endsWith(".mp3"))?.audio ||
+        null;
 
       // Lấy phát âm
-      details.phonetic = dictData.phonetic || dictData.phonetics?.find(p => p.text)?.text || "Không có phát âm";
+      details.phonetic =
+        dictData.phonetic ||
+        dictData.phonetics?.find((p) => p.text)?.text ||
+        "Không có phát âm";
     } catch (apiError) {
       console.error("Free Dictionary API error:", apiError.message);
     }
 
     // Lấy ví dụ từ API nội bộ
     try {
-      const exampleRes = await axios.post('http://localhost:4000/api/getExample', { word }, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 20000
-      });
+      const exampleRes = await axios.post(
+        "http://localhost:4000/api/getExample",
+        { word },
+        {
+          headers: { "Content-Type": "application/json" },
+          timeout: 20000,
+        }
+      );
       const results = exampleRes.data.results;
       details.exampleSentence = results.length
-        ? results.map(item => `${item.partOfSpeech}: ${item.example}`).join('\n-')
-        : 'Không tìm thấy ví dụ.';
+        ? results
+            .map((item) => `${item.partOfSpeech}: ${item.example}`)
+            .join("\n-")
+        : "Không tìm thấy ví dụ.";
     } catch (err) {
       console.log("Lỗi khi lấy ví dụ từ api/getExample");
     }
     //lấy hình ảnh theo từ
     const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
-    const unsplashRes = await fetch(`https://api.unsplash.com/search/photos?query=${word}&per_page=1`, {
-      headers: {
-        Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`,
-      },
-    });
+    const unsplashRes = await fetch(
+      `https://api.unsplash.com/search/photos?query=${word}&per_page=1`,
+      {
+        headers: {
+          Authorization: `Client-ID ${UNSPLASH_ACCESS_KEY}`,
+        },
+      }
+    );
 
     const data = await unsplashRes.json();
     const imglink = data.results[0]?.urls?.regular || null;
@@ -361,7 +373,7 @@ const getRandomWord = async (req, res) => {
         phonetic: details.phonetic,
         exampleSentence: details.exampleSentence,
         audio: details.audio,
-        imglink: details.imglink
+        imglink: details.imglink,
       },
     });
   } catch (err) {

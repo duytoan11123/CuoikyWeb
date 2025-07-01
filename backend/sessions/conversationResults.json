@@ -1,0 +1,39 @@
+{
+  "3": {
+    "advertising": [
+      {
+        "vocab": "boost",
+        "isCorrect": true,
+        "time": 1751368285510
+      }
+    ]
+  },
+  "5": {
+    "advertising": [
+      {
+        "vocab": "company",
+        "isCorrect": true,
+        "time": 1751389571421
+      }
+    ]
+  },
+  "demo": {
+    "advertising": [
+      {
+        "vocab": "targeted",
+        "isCorrect": true,
+        "time": 1751293627949
+      },
+      {
+        "vocab": "ad blockers",
+        "isCorrect": true,
+        "time": 1751293631568
+      },
+      {
+        "vocab": "endorse",
+        "isCorrect": true,
+        "time": 1751293635717
+      }
+    ]
+  }
+}

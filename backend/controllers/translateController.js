@@ -117,4 +117,30 @@ async function getExample(req, res) {
       .json({ error: "Đã xảy ra lỗi khi lấy dữ liệu từ vdict.com" });
   }
 }
-module.exports = {translateVietnameseWord, getExample};
+
+// Dịch đoạn văn bản sử dụng MyMemory Translation API
+async function translateTextWithMyMemory(req, res) {
+  const text = req.body.text;
+  if (!text) {
+    return res.status(400).json({ error: 'Thiếu trường text để dịch.' });
+  }
+  const encodedText = encodeURIComponent(text);
+  const url = `https://api.mymemory.translated.net/get?q=${encodedText}&langpair=en|vi`;
+  try {
+    const response = await axios.get(url);
+    const translatedText = response.data?.responseData?.translatedText;
+    if (!translatedText) {
+      return res.status(500).json({ error: 'Không nhận được bản dịch từ MyMemory.' });
+    }
+    console.log('MyMemory Translation:', { original: text, translated: translatedText });
+    res.json({
+      original: text,
+      translated: translatedText,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Đã xảy ra lỗi khi dịch với MyMemory.' });
+  }
+}
+
+module.exports = {translateVietnameseWord, getExample, translateTextWithMyMemory};

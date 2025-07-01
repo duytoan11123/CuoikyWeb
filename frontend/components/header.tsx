@@ -1,8 +1,8 @@
-<nav className=" flex justify-between w-[70%] items-center"></nav>
+'use client'
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { showSuccess, showError } from './notification';
 
 export default function Header() {
   const pathname = usePathname();
@@ -12,58 +12,94 @@ export default function Header() {
   useEffect(() => {
     async function fetchAccount() {
       try {
-        const res = await fetch('http://localhost:4000/api/account', { credentials: 'include' });
+        const res = await fetch('http://localhost:4000/api/account/getAccountName', { credentials: 'include' });
         const data = await res.json();
-        if (data.status === 'success') setAccountName(data.name || data.email || '');
-      } catch (e) { setAccountName(''); }
+        if (data.status === 'success') setAccountName(data.name);
+        console.log(accountName);
+      } catch {
+        setAccountName('');
+      }
     }
     fetchAccount();
   }, []);
 
-  return (
-    <header className="bg-zinc-900 bg-slate-800/90 backdrop-blur px-6 py-2 flex items-center justify-between">
-      {/* Logo */}
-      <div className="flex items-center space-x-2">
-        <Image src="/logo1.png" alt="Mochi Logo" width={90} height={20} />
-
-      </div>
-
-      {/* Navigation */}
-      <nav className=" flex justify-between w-[70%]">
-        <NavItem src="/news" icon="/icons/news.svg" label="Tin tức" isActive={pathname === '/news'} />
-        <NavItem src="/practice" icon="/icons/study.svg" label="Luyện Tập" isActive={pathname === '/study'} />
-        <NavItem src="/notebook" icon="/icons/notebook.svg" label="Sổ tay" isActive={pathname === '/notebook'}  />
-        <NavItem src="/#" icon="/icons/user.svg" label="Tài khoản" isActive={pathname === '/account'}  />
-      </nav>
-
-      {/* User Avatar */}
-              <span className="text-yellow-400 font-extrabold text-xl">Xin Chào {accountName}</span>
-      <div className="w-10 h-10 rounded-full border-2 border-green-500 overflow-hidden"  onClick={() => {fetch('http://localhost:4000/api/auth/logout',{
-        credentials:'include',
-        method: 'POST'
-      })
-      router.refresh();
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('http://localhost:4000/api/auth/logout', {
+        credentials: 'include',
+        method: 'POST',
+      });
+      if (res.ok) {
+        showSuccess('Đăng xuất thành công!');
+        router.push('/login');
+      } else {
+        showError('Đăng xuất thất bại!');
+      }
+    } catch (err) {
+      showError('Lỗi khi đăng xuất!');
     }
-      }>
-        <Image src="/avatar/avatar1.jpg" alt="User Avatar" width={40} height={40} />
+  };
+
+  return (
+    <header className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 text-white shadow-2xl rounded-b-3xl px-6 py-4 border-b border-indigo-900">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Left: Logo */}
+        <div className="flex items-center space-x-3">
+          <Image src="/logo1.png" alt="Logo" width={40} height={40} />
+          <span className="text-2xl font-bold tracking-wide hidden sm:block text-white drop-shadow-lg" style={{ fontFamily: 'Times New Roman' }}>Demo App</span>
+        </div>
+
+        {/* Center: Navigation */}
+        <nav className="hidden md:flex space-x-6">
+          <NavItem href="/news" label="Tin tức" active={pathname === '/news'} />
+          <NavItem href="/practice" label="Luyện tập" active={pathname === '/practice'} />
+          <NavItem href="/notebook" label="Sổ tay" active={pathname === '/notebook'} />
+          <NavItem href="/conversation" label="Hội thoại" active={pathname === '/conversation'} />
+          <NavItem href="/account" label="Tài khoản" active={pathname === '/account'} />
+        </nav>
+
+        {/* Right: User Info */}
+        <div className="flex items-center space-x-4">
+          <span className="text-base text-white font-medium hidden sm:block" style={{ fontFamily: 'Times New Roman' }}>
+            👋 Xin chào, <span className="font-bold text-yellow-200">{accountName}</span>
+          </span>
+          <button
+            onClick={handleLogout}
+            title="Đăng xuất"
+            className="w-11 h-11 rounded-full border-2 border-pink-400 hover:border-indigo-500 overflow-hidden shadow-lg transition duration-200 bg-gradient-to-tr from-pink-100 to-indigo-100"
+          >
+            <Image
+              src="/avatar/avatar1.jpg"
+              alt="User Avatar"
+              width={44}
+              height={44}
+              className="object-cover w-full h-full"
+            />
+          </button>
+          <button
+            onClick={handleLogout}
+            className="ml-2 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-400 to-indigo-400 text-white font-semibold shadow hover:from-indigo-500 hover:to-pink-500 transition text-sm border-2 border-pink-200 hover:border-indigo-400"
+            title="Đăng xuất"
+          >
+            Đăng xuất
+          </button>
+        </div>
       </div>
     </header>
   );
 }
 
-// Component cho mỗi item trong nav
-function NavItem({ icon, label, isActive, src }: { icon: string; label: string; isActive?: boolean; src: string }) {
+function NavItem({ href, label, active }: { href: string; label: string; active: boolean }) {
   return (
-    <a 
-      href={src} 
-      className={`w-[20%] flex flex-col items-center text-sm p-2 rounded-lg transition-all duration-300 ${
-        isActive 
-          ? 'text-white font-bold bg-indigo-800 border-indigo-500' 
-          : 'text-2xl font-semibold text-white hover:bg-indigo-700'
+    <a
+      href={href}
+      className={`relative font-semibold px-4 py-2 rounded-xl transition-all duration-200 ${
+        active
+          ? 'bg-white/20 text-white shadow-md'
+          : 'text-white hover:bg-white/10 hover:text-yellow-200'
       }`}
     >
-      <Image src={icon} alt={label} width={24} height={24} />
-      <span>{label}</span>
+      {label}
     </a>
   );
 }

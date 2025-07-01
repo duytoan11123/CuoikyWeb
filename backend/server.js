@@ -7,6 +7,8 @@ const newsRoutes = require('./routes/newsRoutes');
 const cors = require('cors');
 const translateRoutes = require('./routes/translateRoutes');
 const { getAccountName } = require('./controllers/Getaccount');
+const accountRoutes = require('./routes/accountRoutes');
+const conversationRoutes = require('./routes/conversationRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -42,18 +44,38 @@ app.get('/', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
-app.get('/api/me',(req,res)=>{
-    if(req.session.user){
-        return res.json({loggedIn: true, user: req.session.user})
-    }else{
-        return res.json({loggedIn: false})
-    }
-})
+
+
+app.use('/api/account', accountRoutes);
 //vocabularyRoute
 app.use('/api', translateRoutes);
-app.use('/vocabulary',vocabularyRoute);
+app.use('/api/vocabulary',vocabularyRoute);
 app.use("/api/get", newsRoutes);
-app.get('/api/account', getAccountName);
+app.use('/api/account', accountRoutes);
+app.use('/api', conversationRoutes);
+
+// Route trả về thông tin user hiện tại
+app.get('/api/me', async (req, res) => {
+  if (req.session && req.session.userId) {
+    // Lấy thêm thông tin user từ DB nếu muốn trả về name
+    try {
+      const { poolPromise } = require('./config/db');
+      const pool = await poolPromise;
+      const [rows] = await pool.query('SELECT Name FROM Users WHERE userId = ?', [req.session.userId]);
+      const name = rows.length > 0 ? rows[0].Name : null;
+      res.json({
+        loggedIn: true,
+        userId: req.session.userId,
+        name: name
+      });
+    } catch (err) {
+      res.json({ loggedIn: true, userId: req.session.userId });
+    }
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
 // Handle 404
 app.use((req, res) => {
     console.log('404 Not Found:', req.method, req.url);

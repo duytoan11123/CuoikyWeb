@@ -1,0 +1,184 @@
+{
+  "advertising": [
+    [
+      {
+        "speaker": "Mochi",
+        "text": "That new soda commercial is really catchy, don't you think?",
+        "highlight": null,
+        "quiz": null,
+        "translation": "Quảng cáo soda mới đó thực sự hấp dẫn, bạn có nghĩ vậy không?"
+      },
+      {
+        "speaker": "Michi",
+        "text": "Yes, it's incredibly effective; I bet it will really boost sales.",
+        "highlight": "boost",
+        "quiz": {
+          "word": "boost",
+          "options": [
+            "thúc đẩy",
+            "Tủ lạnh"
+          ],
+          "correctIndex": 0,
+          "meaning": "thúc đẩy"
+        },
+        "translation": "Vâng, nó cực kỳ hiệu quả; Tôi cá là nó sẽ thực sự thúc đẩy doanh số bán hàng."
+      },
+      {
+        "speaker": "Mochi",
+        "text": "I wonder how they decided on the jingle and the visuals?",
+        "highlight": null,
+        "quiz": null,
+        "translation": "Tôi tự hỏi làm thế nào họ quyết định về tiếng leng keng và hình ảnh?"
+      },
+      {
+        "speaker": "Michi",
+        "text": "Probably through extensive market research to effectively target their demographic.",
+        "highlight": null,
+        "quiz": null,
+        "translation": "Có lẽ thông qua nghiên cứu thị trường sâu rộng để nhắm mục tiêu hiệu quả vào nhân khẩu học của họ."
+      },
+      {
+        "speaker": "Mochi",
+        "text": "Makes sense.  Clever advertising is key these days.",
+        "highlight": null,
+        "quiz": null,
+        "translation": "Có ý nghĩa. Quảng cáo thông minh là chìa khóa trong những ngày này."
+      }
+    ],
+    [
+      {
+        "speaker": "Mochi",
+        "text": "That new coffee ad is everywhere!",
+        "highlight": null,
+        "quiz": null,
+        "translation": "Quảng cáo cà phê mới đó có ở khắp mọi nơi!"
+      },
+      {
+        "speaker": "Michi",
+        "text": "Yeah, it's clearly designed to boost sales during the holiday season.",
+        "highlight": "boost",
+        "quiz": {
+          "word": "boost",
+          "options": [
+            "thúc đẩy",
+            "Tivi"
+          ],
+          "correctIndex": 0,
+          "meaning": "thúc đẩy"
+        },
+        "translation": "Vâng, nó được thiết kế rõ ràng để tăng doanh số bán hàng trong kỳ nghỉ lễ."
+      },
+      {
+        "speaker": "Mochi",
+        "text": "I wonder how they decided on their target audience?",
+        "highlight": null,
+        "quiz": null,
+        "translation": "Tôi tự hỏi làm thế nào họ quyết định đối tượng mục tiêu của họ?"
+      },
+      {
+        "speaker": "Michi",
+        "text": "Probably through market research; they're clearly targeting young professionals.",
+        "highlight": null,
+        "quiz": null,
+        "translation": "Có lẽ thông qua nghiên cứu thị trường; họ rõ ràng đang nhắm mục tiêu đến các chuyên gia trẻ."
+      },
+      {
+        "speaker": "Mochi",
+        "text": "Smart, very smart.",
+        "highlight": null,
+        "quiz": null,
+        "translation": "Thông minh, rất thông minh."
+      }
+    ]
+  ],
+  "advertising_1751389076573_752": [
+    {
+      "speaker": "Mochi",
+      "text": "What do you know about branding?",
+      "translation": "Bạn biết gì về thương hiệu?",
+      "highlight": null,
+      "quiz": null
+    },
+    {
+      "speaker": "Michi",
+      "text": "Branding is essential for every company.",
+      "translation": "Thương hiệu rất quan trọng đối với mọi <b class='text-blue-700 font-bold'>công ty</b>.",
+      "highlight": "company",
+      "quiz": {
+        "word": "company",
+        "options": [
+          "Công ty",
+          "Thương"
+        ],
+        "correctIndex": 0,
+        "meaning": "Công ty"
+      }
+    },
+    {
+      "speaker": "Mochi",
+      "text": "Do you follow any campaigns online?",
+      "highlight": null,
+      "quiz": null,
+      "translation": "Bạn có theo dõi chiến dịch nào trên mạng không?"
+    },
+    {
+      "speaker": "Michi",
+      "text": "Yes, I like creative campaigns with a strong message.",
+      "highlight": null,
+      "quiz": null,
+      "translation": "Có, tôi thích những chiến dịch sáng tạo với thông điệp mạnh mẽ."
+    },
+    {
+      "speaker": "Mochi",
+      "text": "Effective advertising reinforces value and builds a loyal customer base.",
+      "highlight": null,
+      "quiz": null,
+      "translation": "Quảng cáo hiệu quả giúp củng cố giá trị và xây dựng cơ sở khách hàng trung thành."
+    }
+  ],
+  "advertising_1751389543969_3721": [
+    {
+      "speaker": "Mochi",
+      "text": "What do you know about branding?",
+      "translation": "Bạn biết gì về thương hiệu?",
+      "highlight": null,
+      "quiz": null
+    },
+    {
+      "speaker": "Michi",
+      "text": "Branding is essential for every company.",
+      "translation": "Thương hiệu rất quan trọng đối với mọi <b class='text-blue-700 font-bold'>công ty</b>.",
+      "highlight": "company",
+      "quiz": {
+        "word": "company",
+        "options": [
+          "Công ty",
+          "Thương"
+        ],
+        "correctIndex": 0,
+        "meaning": "Công ty"
+      }
+    },
+    {
+      "speaker": "Mochi",
+      "text": "Do you follow any campaigns online?",
+      "highlight": null,
+      "quiz": null,
+      "translation": "Bạn có theo dõi chiến dịch nào trên mạng không?"
+    },
+    {
+      "speaker": "Michi",
+      "text": "Yes, I like creative campaigns with a strong message.",
+      "highlight": null,
+      "quiz": null,
+      "translation": "Có, tôi thích những chiến dịch sáng tạo với thông điệp mạnh mẽ."
+    },
+    {
+      "speaker": "Mochi",
+      "text": "Effective advertising reinforces value and builds a loyal customer base.",
+      "highlight": null,
+      "quiz": null,
+      "translation": "Quảng cáo hiệu quả giúp củng cố giá trị và xây dựng cơ sở khách hàng trung thành."
+    }
+  ]
+}
