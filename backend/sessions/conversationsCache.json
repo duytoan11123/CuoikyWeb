@@ -180,5 +180,50 @@
       "quiz": null,
       "translation": "Quảng cáo hiệu quả giúp củng cố giá trị và xây dựng cơ sở khách hàng trung thành."
     }
+  ],
+  "advertising_1751394816712_5298": [
+    {
+      "speaker": "Mochi",
+      "text": "What do you know about branding?",
+      "translation": "Bạn biết gì về thương hiệu?",
+      "highlight": null,
+      "quiz": null
+    },
+    {
+      "speaker": "Michi",
+      "text": "Branding is essential for every company.",
+      "translation": "Thương hiệu rất quan trọng đối với mọi <b class='text-blue-700 font-bold'>công ty</b>.",
+      "highlight": "company",
+      "quiz": {
+        "word": "company",
+        "options": [
+          "Công ty",
+          "Thương"
+        ],
+        "correctIndex": 0,
+        "meaning": "Công ty"
+      }
+    },
+    {
+      "speaker": "Mochi",
+      "text": "Do you follow any campaigns online?",
+      "highlight": null,
+      "quiz": null,
+      "translation": "Bạn có theo dõi chiến dịch nào trên mạng không?"
+    },
+    {
+      "speaker": "Michi",
+      "text": "Yes, I like creative campaigns with a strong message.",
+      "highlight": null,
+      "quiz": null,
+      "translation": "Có, tôi thích những chiến dịch sáng tạo với thông điệp mạnh mẽ."
+    },
+    {
+      "speaker": "Mochi",
+      "text": "Effective advertising reinforces value and builds a loyal customer base.",
+      "highlight": null,
+      "quiz": null,
+      "translation": "Quảng cáo hiệu quả giúp củng cố giá trị và xây dựng cơ sở khách hàng trung thành."
+    }
   ]
 }

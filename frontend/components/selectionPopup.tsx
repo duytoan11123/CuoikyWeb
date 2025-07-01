@@ -180,7 +180,8 @@ export default function SelectionPopup() {
         {/* Nút thêm từ */}
         <button
           onClick={() => addWWord(user.userId, selectedText)}
-          className="flex items-center gap-1 bg-gradient-to-r from-pink-500 to-indigo-500 hover:from-indigo-500 hover:to-pink-500 text-white text-xs px-2.5 py-1.5 rounded-full shadow-md transition font-semibold min-w-fit"
+          className=" flex items-center gap-1 bg-gradient-to-r from-pink-500 to-indigo-500 hover:from-indigo-500 hover:to-pink-500 text-white text-xs px-2.5 py-1.5 rounded-full shadow-md transition font-semibold min-w-fit"
+          hidden={!popup.translatedText.includes('div')}
         >
           <span className="text-base">＋</span> Thêm từ
         </button>
