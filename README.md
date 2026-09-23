@@ -20,12 +20,6 @@ mysql -u root -p cuoiKyWeb < ./database/init.sql
 ⚙️ 3. Tạo file cấu hình .env
 Tạo file .env trong thư mục backend:
 ```
-PORT=4000
-GOOGLE_CLIENT_ID=150280757509-i2av5mkmagn5u8a1ahrf9d52bot0qjl5.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
-SESSION_SECRET=your-super-secret-key-123456789
-UNSPLASH_ACCESS_KEY = 83GIB2x9Kc8x5vpJdsr4jxtu41b6broj09YEBALrAEU
-GEMINI_API_KEY=AIzaSyAA19o_YJw_aOfJvzzoEq5y16yu9ugBF2Q
 
 
 
